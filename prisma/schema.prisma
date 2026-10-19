@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Species {
+  DOG
+  CAT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum PetStatus {
+  AVAILABLE
+  IN_PROCESS
+  ADOPTED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+}
+
+enum DonationType {
+  FINANCIAL
+  MATERIAL
+}
+
+enum UserRole {
+  USER
+  VOLUNTEER
+  ADMIN
+}
+
+model User {
+  id           String                @id @default(cuid())
+  name         String
+  email        String                @unique
+  passwordHash String
+  cpf          String?               @unique
+  phone        String?
+  role         UserRole              @default(USER)
+  pets         Pet[]
+  donations    Donation[]
+  applications AdoptionApplication[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+}
+
+model Pet {
+  id           String                @id @default(cuid())
+  name         String
+  species      String
+  breed        String
+  age          String
+  gender       String
+  description  String
+  imageData     String
+  city         String
+  state        String                @db.VarChar(2)
+  status       PetStatus             @default(AVAILABLE)
+  featured     Boolean               @default(false)
+  createdById  String?
+  createdBy    User?                 @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  applications AdoptionApplication[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@index([city, state])
+  @@index([createdById])
+}
+
+model AdoptionApplication {
+  id        String            @id @default(cuid())
+  petId     String
+  pet       Pet               @relation(fields: [petId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  phone     String?
+  message   String?
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([petId, status])
+  @@index([email])
+  @@index([userId])
+}
+
+model Donation {
+  id          String       @id @default(cuid())
+  type        DonationType
+  amount      Decimal?     @db.Decimal(10, 2)
+  description String?
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt   DateTime     @default(now())
+
+  @@index([type, createdAt])
+  @@index([userId])
+}

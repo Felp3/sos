@@ -1,0 +1,10 @@
+{
+  "description": "Connects animal adopters with shelters through an easy-to-use platform showcasing pets available for adoption with detailed profiles and search options.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
