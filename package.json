@@ -8,8 +8,6 @@
     "dev:ssr": "tsx watch src/server/server.ts",
     "dev:server": "tsx watch src/server/index.ts",
     "build": "pnpm build:client && pnpm build:ssr",
-    "build:client": "vite build --outDir dist/client",
-    "build:ssr": "vite build --ssr src/entry-server.tsx --outDir dist/server",
     "preview": "vite preview",
     "start:ssr": "tsx src/server/server.ts",
     "format": "oxfmt",
