@@ -5,11 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:ssr": "tsx watch src/server/server.ts",
-    "dev:server": "tsx watch src/server/index.ts",
-    "build": "pnpm build:client && pnpm build:ssr",
-    "preview": "vite preview",
-    "start:ssr": "tsx src/server/server.ts",
+    "build": "vite build",
     "format": "oxfmt",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
