@@ -1,12 +1,31 @@
 import { defineConfig, type HtmlTagDescriptor, type Plugin } from "vite"
 import react from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
+import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { createRequire } from "node:module"
+import type { Adapter } from "vite-plugin-mix"
 import siteConfiguration from "./site.json"
 
 const require = createRequire(import.meta.url)
 const mix: typeof import("vite-plugin-mix") = require("vite-plugin-mix")
+const vercelAdapter = mix.vercelAdapter()
+const vercelNode22Adapter: Adapter = {
+  ...vercelAdapter,
+  async buildEnd(options) {
+    await vercelAdapter.buildEnd?.(options)
+
+    const functionConfigPath = path.join(
+      options.root,
+      ".vercel/output/functions/handler.func/.vc-config.json",
+    )
+    const functionConfig: { runtime: string } = JSON.parse(
+      await readFile(functionConfigPath, "utf8"),
+    )
+    functionConfig.runtime = "nodejs22.x"
+    await writeFile(functionConfigPath, JSON.stringify(functionConfig))
+  },
+}
 
 // Vite config — https://vitejs.dev/config/
 export default defineConfig(({ mode, isSsrBuild }) => {
@@ -31,7 +50,9 @@ export default defineConfig(({ mode, isSsrBuild }) => {
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
       figmaMakeKitPlugin({ storiesGlob: "/src/**/*.stories.{ts,tsx,js,jsx}" }),
-      ...(!isSsrBuild ? [mix.default({ handler: "./api.ts", adapter: mix.vercelAdapter() })] : []),
+      ...(!isSsrBuild
+        ? [mix.default({ handler: "./api.ts", adapter: vercelNode22Adapter })]
+        : []),
     ],
     resolve: {
       alias: {
